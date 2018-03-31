@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">SDSUClassRegistration</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="red_id">RedID</string>
+    <string name="email_address">Email</string>
+    <string name="password">Password</string>
+    <string name="red_id_hint">SDSU RED Id</string>
+    <string name="email_address_hint">Email Address</string>
+    <string name="password_hint">Password</string>
+</resources>
