@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.herasiddiqui.sdsuclassregistration">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:name=".CertificateApplication"
         android:allowBackup="true"
@@ -17,6 +20,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ClassesAndWaitlist" />
+        <activity android:name=".SignIn" />
+        <activity android:name=".DetailedView" />
+        <activity android:name=".Waitlist" />
+        <activity android:name=".CompleteClassDetails" />
+        <activity android:name=".Drop" />
+        <activity android:name=".Filters"></activity>
     </application>
 
 </manifest>

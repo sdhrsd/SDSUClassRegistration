@@ -8,4 +8,35 @@
     <string name="red_id_hint">SDSU RED Id</string>
     <string name="email_address_hint">Email Address</string>
     <string name="password_hint">Password</string>
+    <string name="register_button">Register</string>
+    <string name="have_account">Have an account? SignIn</string>
+    <string name="no_account">Don\'t have an account? Register</string>
+    <string name="signin_button">SignIn</string>
+    <string name="my_classes">My Classes</string>
+    <string name="add_classes">Add Class</string>
+    <string name="drop_classes">Drop Class</string>
+    <string name="my_waitlist">My Waitlist</string>
+    <string name="reset_classes">Reset</string>
+    <string name="details">Details</string>
+    <string name="drop">Drop</string>
+
+    <string name="courseNo">Course# :</string>
+    <string name="title">Title :</string>
+    <string name="department">Department :</string>
+    <string name="location">Location :</string>
+    <string name="instructor">Instructor :</string>
+    <string name="time">Time :</string>
+    <string name="scheduleNo">Schedule# :</string>
+    <string name="units">Units :</string>
+    <string name="days">Days :</string>
+
+    <string name="cancel">Cancel</string>
+    <string name="remove">Remove</string>
+    <string name="clear">Clear</string>
+    <string name="search">Search</string>
+    <string name="select_subject">Select Subject</string>
+    <string name="select_level">Select Level</string>
+    <string name="dismiss_builder">Cancel</string>
+    <string name="ok_builder">OK</string>
+    <string name="clear_all_builder">Clear</string>
 </resources>
