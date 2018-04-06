@@ -14,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -25,55 +27,53 @@ import java.util.ArrayList;
 
 public class ClassesAndWaitlist extends AppCompatActivity {
 
-    private Button goToMyWaitlist;
-    private Button resetAllClasses;
-    private Button addClass;
     public static final String PREFS_DEFAULT = "";
-    private RecyclerView classesRecyclerView;
     private ArrayList<ClassDetails> addedClassDetails = new ArrayList<>();
     SharedPreferences sharedPref;
     String retrievedRedID;
     String retrievedPassword;
-    ClassAndWaitRecyclerViewAdapter firstAdapter;
+    ClassAndWaitRecyclerViewAdapter classesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_classes_and_waitlist);
-        goToMyWaitlist = findViewById(R.id.goToMyWaitlist);
+        Button goToMyWaitlist = findViewById(R.id.goToMyWaitlist);
+        Button addClass = findViewById(R.id.addClassButtonC);
+        Button resetAllClasses = findViewById(R.id.resetButtonC);
+
         goToMyWaitlist.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent go = new Intent(ClassesAndWaitlist.this,Waitlist.class);
+                Intent go = new Intent(ClassesAndWaitlist.this,Waitlist.class); //goes to waitlist activity
                 startActivity(go);
             }
         });
-        addClass = findViewById(R.id.addClassButtonC);
+
         addClass.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ClassesAndWaitlist.this,Filters.class);
+                Intent intent = new Intent(ClassesAndWaitlist.this,Filters.class); //goes to filter activity
                 startActivity(intent);
             }
         });
-        resetAllClasses = findViewById(R.id.resetButtonC);
+
         resetAllClasses.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 resetStudent();
             }
         });
-        addClass = findViewById(R.id.addClassButtonC);
-        classesRecyclerView = findViewById(R.id.recyclerClasses);
+
+        RecyclerView classesRecyclerView = findViewById(R.id.recyclerClasses);
         RecyclerView.LayoutManager classesLayoutManager = new LinearLayoutManager(this);
         classesRecyclerView.setLayoutManager(classesLayoutManager);
-        firstAdapter = new ClassAndWaitRecyclerViewAdapter(ClassesAndWaitlist.this,addedClassDetails);
-        classesRecyclerView.setAdapter(firstAdapter);
+        classesAdapter = new ClassAndWaitRecyclerViewAdapter(ClassesAndWaitlist.this,addedClassDetails);
+        classesRecyclerView.setAdapter(classesAdapter);
 
         sharedPref = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         retrievedRedID = sharedPref.getString("RedID",PREFS_DEFAULT);
         retrievedPassword = sharedPref.getString("password",PREFS_DEFAULT);
-        //getEnrolledClasses(retrievedRedID,retrievedPassword);
     }
 
     @Override
@@ -103,16 +103,23 @@ public class ClassesAndWaitlist extends AppCompatActivity {
         finish();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addedClassDetails.clear();
+        classesAdapter.notifyDataSetChanged();
+        getEnrolledClasses(retrievedRedID,retrievedPassword);
+    }
+
     public void getEnrolledClasses(String redId,String password) {
         addedClassDetails.clear();
-        firstAdapter.notifyDataSetChanged();
+        classesAdapter.notifyDataSetChanged();
         String enrolledURL = "https://bismarck.sdsu.edu/registration/studentclasses?redid=";
         enrolledURL = enrolledURL+redId+"&password="+password;
-        JsonObjectRequest getRequest = new JsonObjectRequest(enrolledURL, null,
+        JsonObjectRequest getRequest = new JsonObjectRequest(Request.Method.GET,enrolledURL,null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-
                         //Toast.makeText(Waitlist.this,response.toString(),Toast.LENGTH_SHORT).show();
                         Log.d("hs", response.toString());
                         try {
@@ -120,7 +127,7 @@ public class ClassesAndWaitlist extends AppCompatActivity {
                             if(enrolledClasses.length() != 0) {
                                 for(int i=0;i<enrolledClasses.length();i++) {
                                     String courseidURL = "https://bismarck.sdsu.edu/registration/classdetails?classid=" + enrolledClasses.getInt(i);
-                                    JsonObjectRequest detailRequest = new JsonObjectRequest(courseidURL, null,
+                                    JsonObjectRequest detailRequest = new JsonObjectRequest(Request.Method.GET,courseidURL, null,
                                             new Response.Listener<JSONObject>() {
                                                 @Override
                                                 public void onResponse(JSONObject response) {
@@ -160,7 +167,12 @@ public class ClassesAndWaitlist extends AppCompatActivity {
     public void responseHelper(JSONObject response) {
         try {
             ClassDetails putInAddedClasses = new ClassDetails();
-            putInAddedClasses.setDescription(response.getString("description"));
+            if(response.has("description")) {
+                putInAddedClasses.setDescription(response.getString("description"));
+            }
+            else {
+                putInAddedClasses.setDescription("");
+            }
             putInAddedClasses.setDepartment(response.getString("department"));
             putInAddedClasses.setSuffix(response.getString("suffix"));
             putInAddedClasses.setBuilding(response.getString("building"));
@@ -170,7 +182,12 @@ public class ClassesAndWaitlist extends AppCompatActivity {
             putInAddedClasses.setEndTime(response.getString("endTime"));
             putInAddedClasses.setEnrolled(response.getInt("enrolled"));
             putInAddedClasses.setDays(response.getString("days"));
-            putInAddedClasses.setPrerequisite(response.getString("prerequisite"));
+            if(response.has("prerequisite")) {
+                putInAddedClasses.setPrerequisite(response.getString("prerequisite"));
+            }
+            else {
+                putInAddedClasses.setPrerequisite("");
+            }
             putInAddedClasses.setTitle(response.getString("title"));
             putInAddedClasses.setId(response.getInt("id"));
             putInAddedClasses.setInstructor(response.getString("instructor"));
@@ -179,28 +196,28 @@ public class ClassesAndWaitlist extends AppCompatActivity {
             putInAddedClasses.setRoom(response.getString("room"));
             putInAddedClasses.setWaitlist(response.getInt("waitlist"));
             putInAddedClasses.setSeats(response.getInt("seats"));
-            putInAddedClasses.setFullTitle(response.getString("fullTitle"));
+            if(response.has("fullTitle")) {
+                putInAddedClasses.setFullTitle(response.getString("fullTitle"));
+            }
+            else {
+                putInAddedClasses.setFullTitle("");
+            }
+
             putInAddedClasses.setSubject(response.getString("subject"));
             putInAddedClasses.setCourseNo(response.getString("course#"));
-            putInAddedClasses.setStudentEnrolled(true);
+            putInAddedClasses.setStudentEnrolled(true); // To check whether enrolled or waitlisted
             addedClassDetails.add(putInAddedClasses);
-            firstAdapter.notifyDataSetChanged();
+            classesAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        addedClassDetails.clear();
-        firstAdapter.notifyDataSetChanged();
-        getEnrolledClasses(retrievedRedID,retrievedPassword);
-    }
+
     public void resetStudent() {
-        Toast.makeText(ClassesAndWaitlist.this, "Reset Clicked", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(ClassesAndWaitlist.this, "Reset Clicked", Toast.LENGTH_SHORT).show();
         String resetURL = "https://bismarck.sdsu.edu/registration/resetstudent?redid="+retrievedRedID+"&password="+retrievedPassword;
-        JsonObjectRequest resetRequest = new JsonObjectRequest(resetURL, null,
+        JsonObjectRequest resetRequest = new JsonObjectRequest(Request.Method.GET,resetURL, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -208,7 +225,7 @@ public class ClassesAndWaitlist extends AppCompatActivity {
                             if (response.has("ok")) {
                                 Toast.makeText(ClassesAndWaitlist.this, response.get("ok").toString(), Toast.LENGTH_SHORT).show();
                                 addedClassDetails.clear();
-                                firstAdapter.notifyDataSetChanged();
+                                classesAdapter.notifyDataSetChanged();
                                 getEnrolledClasses(retrievedRedID,retrievedPassword);
                             }
                             else if (response.has("error")) {

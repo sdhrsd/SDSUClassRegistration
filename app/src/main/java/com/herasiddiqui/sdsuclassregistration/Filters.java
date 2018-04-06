@@ -1,7 +1,15 @@
 package com.herasiddiqui.sdsuclassregistration;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -41,12 +49,19 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
     ArrayList<Subject> allSubjectArrayList = new ArrayList<>();  // ArrayList for storing all Subject Details
     String subjectListURL = "https://bismarck.sdsu.edu/registration/subjectlist";
 
+    RecyclerView searchRecyclerView;
+    private ArrayList<ClassDetails> addedClassDetails = new ArrayList<>();
+    SearchRecycleViewAdapter searchAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_filters);
+
         search = findViewById(R.id.buttonSearch);
+        searchRecyclerView = findViewById(R.id.searchRecyclerView);
+        RecyclerView.LayoutManager searchLayoutManager = new LinearLayoutManager(this);
+        searchRecyclerView.setLayoutManager(searchLayoutManager);
 
         subjectSpinner = findViewById(R.id.spinnerForSubject);
         subjectSpinner.setOnItemSelectedListener(this);
@@ -77,6 +92,8 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
         endTimeList = getResources().getStringArray(R.array.end_time_list);
 
         getListOfSubjects();
+        searchAdapter = new SearchRecycleViewAdapter(Filters.this,addedClassDetails);
+        searchRecyclerView.setAdapter(searchAdapter);
 
         search.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -140,7 +157,7 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
 
             case R.id.spinnerForSubject:
                     levelSelected = parent.getItemAtPosition(position).toString();
-                    Toast.makeText(Filters.this, levelSelected, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Filters.this, levelSelected, Toast.LENGTH_SHORT).show();
                     for(Subject subject: allSubjectArrayList) {
                         if(subject.getTitle().equals(levelSelected)) {
                             subjectSelectedId = subject.getId();
@@ -152,7 +169,7 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
             case R.id.spinnerForLevel:
                 if(position != 0) {
                     levelSelected = parent.getItemAtPosition(position).toString();
-                    Toast.makeText(Filters.this, levelSelected, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Filters.this, levelSelected, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     levelSelected = "";
@@ -161,7 +178,7 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
             case R.id.spinnerForStartTime:
                 if(position != 0) {
                     startTimeSelected = parent.getItemAtPosition(position).toString();
-                    Toast.makeText(Filters.this, startTimeSelected, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Filters.this, startTimeSelected, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     startTimeSelected = "";
@@ -170,7 +187,7 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
             case R.id.spinnerForEndTime:
                 if(position != 0) {
                     endTimeSelected = parent.getItemAtPosition(position).toString();
-                    Toast.makeText(Filters.this, endTimeSelected, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Filters.this, endTimeSelected, Toast.LENGTH_SHORT).show();
                 }
                 else {
                     endTimeSelected = "";
@@ -187,9 +204,11 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
     }
 
     public void getSearchResults(){
+        addedClassDetails.clear();
+        searchAdapter.notifyDataSetChanged();
         String searchURL = "https://bismarck.sdsu.edu/registration/classidslist?subjectid=";
         if(subjectSelectedId != 0) {
-            searchURL = searchURL + subjectSelectedId;
+            searchURL = searchURL + subjectSelectedId + "&level="+levelSelected +"&starttime="+startTimeSelected+"&endtime="+endTimeSelected;
         }
 
         final JsonArrayRequest getcourseIdsRequest = new JsonArrayRequest(searchURL,
@@ -206,7 +225,46 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
                                                 @Override
                                                 public void onResponse(JSONObject response) {
                                                     try {
-                                                        Toast.makeText(Filters.this,"Course detail " + response.get("description"),Toast.LENGTH_SHORT).show();
+                                                        ClassDetails putInAddedClasses = new ClassDetails();
+                                                        if(response.has("description")) {
+                                                            putInAddedClasses.setDescription(response.getString("description"));
+                                                        } else {
+                                                            putInAddedClasses.setDescription("");
+                                                        }
+                                                        putInAddedClasses.setDepartment(response.getString("department"));
+                                                        putInAddedClasses.setSuffix(response.getString("suffix"));
+                                                        putInAddedClasses.setBuilding(response.getString("building"));
+                                                        putInAddedClasses.setStartTime(response.getString("startTime"));
+                                                        putInAddedClasses.setMeetingType(response.getString("meetingType"));
+                                                        putInAddedClasses.setSection(response.getString("section"));
+                                                        putInAddedClasses.setEndTime(response.getString("endTime"));
+                                                        putInAddedClasses.setEnrolled(response.getInt("enrolled"));
+                                                        putInAddedClasses.setDays(response.getString("days"));
+                                                        if(response.has("prerequisite")) {
+                                                            putInAddedClasses.setPrerequisite(response.getString("prerequisite"));
+                                                        } else {
+                                                            putInAddedClasses.setPrerequisite("");
+                                                        }
+                                                        putInAddedClasses.setTitle(response.getString("title"));
+                                                        putInAddedClasses.setId(response.getInt("id"));
+                                                        putInAddedClasses.setInstructor(response.getString("instructor"));
+                                                        putInAddedClasses.setScheduleNo(response.getString("schedule#"));
+                                                        putInAddedClasses.setUnits(response.getString("units"));
+                                                        putInAddedClasses.setRoom(response.getString("room"));
+                                                        putInAddedClasses.setWaitlist(response.getInt("waitlist"));
+                                                        putInAddedClasses.setSeats(response.getInt("seats"));
+                                                        if(response.has("fullTitle")) {
+                                                            putInAddedClasses.setFullTitle(response.getString("fullTitle"));
+                                                        } else {
+                                                            putInAddedClasses.setFullTitle("");
+                                                        }
+                                                        putInAddedClasses.setSubject(response.getString("subject"));
+                                                        putInAddedClasses.setCourseNo(response.getString("course#"));
+                                                        putInAddedClasses.setWaitlist(response.getInt("waitlist"));
+                                                        //putInAddedClasses.setStudentEnrolled(true);
+                                                        addedClassDetails.add(putInAddedClasses);
+                                                        searchAdapter.notifyDataSetChanged();
+                                                        //Toast.makeText(Filters.this,"Course detail " + response.get("description"),Toast.LENGTH_SHORT).show();
                                                     }catch(JSONException e) {
                                                         e.printStackTrace();
                                                     }
@@ -237,6 +295,33 @@ public class Filters extends AppCompatActivity implements AdapterView.OnItemSele
                 }
         );
         VolleyQueue.getInstance(getApplicationContext()).addToRequestQueue(getcourseIdsRequest);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_logout) {
+            logoutButtonClicked();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void logoutButtonClicked() {
+        SharedPreferences preferences =getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.commit();
+        Intent go = new Intent(this,MainActivity.class);
+        startActivity(go);
+        finish();
     }
 
 }

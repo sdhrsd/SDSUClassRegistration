@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -46,6 +47,7 @@ public class SignIn extends AppCompatActivity {
     }
 
     public void signInClicked(View button) {
+        hideKeyboard();
         if(signInRedId.getText().toString().equals("")) {
             Toast.makeText(this,"Enter your SDSU RedId",Toast.LENGTH_SHORT).show();
         }
@@ -59,14 +61,14 @@ public class SignIn extends AppCompatActivity {
             Response.Listener<JSONObject> success = new Response.Listener<JSONObject>() {
                 public void onResponse(JSONObject response) {
                     if (!response.has("error")){
-                        Toast.makeText(SignIn.this, response.toString(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(SignIn.this, response.toString(), Toast.LENGTH_SHORT).show();
                     Log.d("hs", response.toString());
-                    // goto next intent
                     SharedPreferences sharedPref = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("RedID", signInRedId.getText().toString());
                     editor.putString("password", signInPassword.getText().toString());
                     editor.commit();
+                    //go to next intent
                     Intent go = new Intent(SignIn.this, ClassesAndWaitlist.class);
                     go.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(go);
@@ -81,6 +83,14 @@ public class SignIn extends AppCompatActivity {
             };
             JsonObjectRequest getRequest = new JsonObjectRequest(signInUserURL,null, success, failure);
             VolleyQueue.getInstance(getApplicationContext()).addToRequestQueue(getRequest);
+        }
+    }
+
+    private void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
     }
 }

@@ -22,11 +22,11 @@
         </activity>
         <activity android:name=".ClassesAndWaitlist" />
         <activity android:name=".SignIn" />
-        <activity android:name=".DetailedView" />
         <activity android:name=".Waitlist" />
         <activity android:name=".CompleteClassDetails" />
         <activity android:name=".Drop" />
-        <activity android:name=".Filters"></activity>
+        <activity android:name=".Filters" />
+        <activity android:name=".AddOrWait"></activity>
     </application>
 
 </manifest>

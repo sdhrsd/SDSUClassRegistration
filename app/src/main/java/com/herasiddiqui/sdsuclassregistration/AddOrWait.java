@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,6 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -21,7 +21,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Drop extends AppCompatActivity {
+public class AddOrWait extends AppCompatActivity {
 
     TextView courseNo;
     TextView scheduleNo;
@@ -30,47 +30,39 @@ public class Drop extends AppCompatActivity {
     TextView title;
     TextView department;
     TextView instructor;
+    TextView seats;
+    TextView waitlist;
     TextView days;
-    Button cancelDrop;
-    Button finalDrop;
-    boolean isEnrolled;
+    Button finalAorW;
+    Button cancelAorW;
     public static final String PREFS_DEFAULT = "";
     SharedPreferences sharedPref;
     String retrievedRedID;
     String retrievedPassword;
     int courseid;
+    int openSeats;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_drop);
+        setContentView(R.layout.activity_add_or_wait);
 
         sharedPref = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         retrievedRedID = sharedPref.getString("RedID",PREFS_DEFAULT);
         retrievedPassword = sharedPref.getString("password",PREFS_DEFAULT);
 
-        courseNo = findViewById(R.id.textViewCourseNo);
-        scheduleNo = findViewById(R.id.textViewScheduleNo);
-        units = findViewById(R.id.textViewUnits);
-        location = findViewById(R.id.textViewLocation);
-        title = findViewById(R.id.textViewTitle);
-        department = findViewById(R.id.textViewDepartment);
-        instructor = findViewById(R.id.textViewInstructor);
-        days = findViewById(R.id.textViewDays);
-        cancelDrop = findViewById(R.id.buttonCancelD);
-        cancelDrop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        finalDrop = findViewById(R.id.buttonFinalDrop);
-        finalDrop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dropOrRemove(retrievedRedID,retrievedPassword,courseid);
-            }
-        });
+        courseNo = findViewById(R.id.cnoAorW);
+        scheduleNo = findViewById(R.id.snoAorW);
+        units = findViewById(R.id.unAorW);
+        location = findViewById(R.id.locAorW);
+        title = findViewById(R.id.fullTitle);
+        department = findViewById(R.id.deptAorW);
+        instructor = findViewById(R.id.instAorW);
+        days = findViewById(R.id.daysAorW);
+        seats = findViewById(R.id.seatsAorW);
+        waitlist = findViewById(R.id.waitlistAorW);
+        finalAorW = findViewById(R.id.finalAorW);
+        cancelAorW = findViewById(R.id.cancelAorW);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -85,54 +77,65 @@ public class Drop extends AppCompatActivity {
             instructor.setText(extras.getString("instructor"));
             days.setText(extras.getString("days"));
             courseid = extras.getInt("courseId");
-            isEnrolled = extras.getBoolean("enrolled");
-            if(isEnrolled) {
-                finalDrop.setText(R.string.drop);
+            openSeats = extras.getInt("seats") - extras.getInt("enrolled");
+            String seatsString = openSeats + "/" + extras.getInt("seats");
+            seats.setText(seatsString);
+            waitlist.setText(Integer.toString(extras.getInt("waitlist")));
+            if(openSeats > 0){
+                finalAorW.setText(R.string.addS);
             }
             else {
-                finalDrop.setText(R.string.remove);
+                finalAorW.setText(R.string.waitS);
             }
         }
+        cancelAorW.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
+        finalAorW.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addOrWaitlistStudent();
+            }
+        });
     }
 
-    public void dropOrRemove(String redId,String password,int courseid) {
-        String dropOrRemoveURL;
-        if(isEnrolled) {
-            dropOrRemoveURL = "https://bismarck.sdsu.edu/registration/unregisterclass?redid=";
-            dropOrRemoveURL = dropOrRemoveURL+redId+"&password="+password+"&courseid="+courseid;
+    public void addOrWaitlistStudent(){
+        String urlAorW = "";
+        if(openSeats > 0) {
+            urlAorW = "https://bismarck.sdsu.edu/registration/registerclass?redid="+ retrievedRedID + "&password="+retrievedPassword+"&courseid="+courseid;
+        } else {
+            urlAorW = "https://bismarck.sdsu.edu/registration/waitlistclass?redid="+ retrievedRedID + "&password="+retrievedPassword+"&courseid="+courseid;
         }
-        else {
-            dropOrRemoveURL = "https://bismarck.sdsu.edu/registration/unwaitlistclass?redid=";
-            dropOrRemoveURL = dropOrRemoveURL+redId+"&password="+password+"&courseid="+courseid;
-        }
-        JsonObjectRequest dropOrRemoveRequest = new JsonObjectRequest(dropOrRemoveURL, null,
+        JsonObjectRequest registerOrAddRequest = new JsonObjectRequest(Request.Method.GET, urlAorW, null,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            if (response.has("ok")) {
-                                Toast.makeText(Drop.this, response.get("ok").toString(), Toast.LENGTH_SHORT).show();
-                                finish();
+                            if(response.has("ok")) {
+                                // Show classes
+                                goBack();
                             }
-                            else if (response.has("error")) {
-                                Toast.makeText(Drop.this, response.get("error").toString(), Toast.LENGTH_SHORT).show();
+                            else {
+                                Toast.makeText(AddOrWait.this,response.getString("error"),Toast.LENGTH_LONG).show();
                             }
-                        } catch (JSONException e) {
+
+                        } catch(JSONException e) {
                             e.printStackTrace();
                         }
 
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Drop.this,error.toString(),Toast.LENGTH_SHORT).show();
-                        Log.d("hs", error.toString());
-                    }
-                }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }
         );
-        VolleyQueue.getInstance(getApplicationContext()).addToRequestQueue(dropOrRemoveRequest);
+        VolleyQueue.getInstance(getApplicationContext()).addToRequestQueue(registerOrAddRequest);
     }
 
     @Override
@@ -161,4 +164,10 @@ public class Drop extends AppCompatActivity {
         startActivity(go);
         finish();
     }
+
+    public void goBack() {
+        Intent goToclasses = new Intent(this,ClassesAndWaitlist.class);
+        navigateUpTo(goToclasses);
+    }
+
 }

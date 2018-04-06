@@ -16,9 +16,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-/**
- * Created by admin on 3/30/18.
- */
 
 public class CertificateApplication extends Application {
     public void onCreate() {

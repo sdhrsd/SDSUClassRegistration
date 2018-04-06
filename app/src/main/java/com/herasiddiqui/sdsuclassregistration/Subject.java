@@ -1,8 +1,5 @@
 package com.herasiddiqui.sdsuclassregistration;
 
-/**
- * Created by admin on 4/4/18.
- */
 
 public class Subject {
 

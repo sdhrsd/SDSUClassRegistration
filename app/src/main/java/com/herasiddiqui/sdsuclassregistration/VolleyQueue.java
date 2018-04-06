@@ -6,9 +6,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 
-/**
- * Created by admin on 3/30/18.
- */
 
 public class VolleyQueue {
     private static final String TAG = "NetworkConnection";

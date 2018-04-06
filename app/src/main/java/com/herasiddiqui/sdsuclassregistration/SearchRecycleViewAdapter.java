@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,38 +13,46 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 
-public class ClassAndWaitRecyclerViewAdapter extends RecyclerView.Adapter<ClassAndWaitRecyclerViewAdapter.ViewHolder> {
+public class SearchRecycleViewAdapter extends RecyclerView.Adapter<SearchRecycleViewAdapter.ViewHolder> {
 
     private Activity activity;
     private ArrayList<ClassDetails> classDetails;
     private ClassDetails populateCell;
 
-    public ClassAndWaitRecyclerViewAdapter(Activity activity, ArrayList<ClassDetails> classDetail) {
+    public SearchRecycleViewAdapter(Activity activity, ArrayList<ClassDetails> classDetail) {
         this.activity = activity;
         this.classDetails = classDetail;
-        System.out.println(classDetails.size());
+        System.out.println("Class size is " +classDetails.size());
     }
-
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SearchRecycleViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = activity.getLayoutInflater();
-        View view = inflater.inflate(R.layout.class_cell, parent, false);
-        return new ViewHolder(view);
+        View view = inflater.inflate(R.layout.search_cell, parent, false);
+        return new SearchRecycleViewAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(SearchRecycleViewAdapter.ViewHolder holder, int position) {
+        populateCell = new ClassDetails();
         populateCell = classDetails.get(position);
-        holder.courseNo.setText(populateCell.getCourseNo());
+        String courseNoString = populateCell.getSubject() +"-"+populateCell.getCourseNo();
+        holder.courseNo.setText(courseNoString);
         holder.scheduleNo.setText(populateCell.getScheduleNo());
         holder.title.setText(populateCell.getTitle());
         holder.units.setText(populateCell.getUnits());
         String timeString = populateCell.getStartTime() +"-" + populateCell.getEndTime();
         holder.time.setText(timeString);
-        String locationString = populateCell.getBuilding() +"-" + populateCell.getRoom();
-        holder.location.setText(locationString);
         holder.day.setText(populateCell.getDays());
         holder.instructor.setText(populateCell.getInstructor());
+        int seatsTally = populateCell.getSeats() - populateCell.getEnrolled();
+        String seatsString = seatsTally +"/"+ populateCell.getSeats();
+        holder.seats.setText(seatsString);
+        if(populateCell.getSeats() - populateCell.getEnrolled() >0) {
+            holder.addOrWait.setText(R.string.addS);
+        }
+        else {
+            holder.addOrWait.setText(R.string.waitS);
+        }
     }
 
     @Override
@@ -62,21 +69,22 @@ public class ClassAndWaitRecyclerViewAdapter extends RecyclerView.Adapter<ClassA
         private TextView location;
         private TextView day;
         private TextView instructor;
+        private TextView seats;
         private Button details;
-        private Button drop;
+        private Button addOrWait;
 
         public ViewHolder(View view) {
             super(view);
-            courseNo = view.findViewById(R.id.courseNo);
-            scheduleNo = view.findViewById(R.id.scheduleNo);
-            title = view.findViewById(R.id.title);
-            units = view.findViewById(R.id.units);
-            time = view.findViewById(R.id.time);
-            day = view.findViewById(R.id.day);
-            instructor = view.findViewById(R.id.instructor);
-            location = view.findViewById(R.id.location);
-            details = view.findViewById(R.id.detailsButton);
-            drop = view.findViewById(R.id.dropButton);
+            courseNo = view.findViewById(R.id.courseNoSearch);
+            scheduleNo = view.findViewById(R.id.scheduleNoSearch);
+            title = view.findViewById(R.id.titleSearch);
+            units = view.findViewById(R.id.unitsSearch);
+            time = view.findViewById(R.id.timeSearch);
+            day = view.findViewById(R.id.daySearch);
+            instructor = view.findViewById(R.id.instructorSearch);
+            seats = view.findViewById(R.id.seatsSearch);
+            details = view.findViewById(R.id.detailsButtonSearch);
+            addOrWait = view.findViewById(R.id.addOrWaitButton);
             details.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -106,12 +114,12 @@ public class ClassAndWaitRecyclerViewAdapter extends RecyclerView.Adapter<ClassA
                     context.startActivity(intent);
                 }
             });
-            drop.setOnClickListener(new View.OnClickListener() {
+            addOrWait.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     //Toast.makeText(v.getContext(), "ITEM PRESSED = " + String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
                     Context context = v.getContext();
-                    Intent intent = new Intent(context, Drop.class);
+                    Intent intent = new Intent(context, AddOrWait.class);
                     intent.putExtra("courseId",classDetails.get(getAdapterPosition()).getId());
                     intent.putExtra("courseNo",classDetails.get(getAdapterPosition()).getCourseNo());
                     intent.putExtra("scheduleNo",classDetails.get(getAdapterPosition()).getScheduleNo());
@@ -125,11 +133,12 @@ public class ClassAndWaitRecyclerViewAdapter extends RecyclerView.Adapter<ClassA
                     intent.putExtra("subject",classDetails.get(getAdapterPosition()).getSubject());
                     intent.putExtra("units",classDetails.get(getAdapterPosition()).getUnits());
                     intent.putExtra("instructor",classDetails.get(getAdapterPosition()).getInstructor());
-                    intent.putExtra("enrolled",classDetails.get(getAdapterPosition()).isStudentEnrolled());
+                    intent.putExtra("enrolled",classDetails.get(getAdapterPosition()).getEnrolled());
+                    intent.putExtra("seats",classDetails.get(getAdapterPosition()).getSeats());
+                    intent.putExtra("waitlist",classDetails.get(getAdapterPosition()).getWaitlist());
                     context.startActivity(intent);
                 }
             });
         }
     }
 }
-

@@ -1,8 +1,5 @@
 package com.herasiddiqui.sdsuclassregistration;
 
-/**
- * Created by admin on 4/2/18.
- */
 
 public class ClassDetails {
 
@@ -29,31 +26,6 @@ public class ClassDetails {
     private String subject;
     private String courseNo;
     private boolean studentEnrolled = false;
-
-//    public ClassDetails(String description, String department, String suffix, String building, String startTime, String meetingType, String section, String endTime, int enrolled, String days, String prerequisite, String title, int id, String instructor, String scheduleNo, String units, String room, int waitlist, int seats, String fullTitle, String subject, String courseNo) {
-//        this.description = description;
-//        this.department = department;
-//        this.suffix = suffix;
-//        this.building = building;
-//        this.startTime = startTime;
-//        this.meetingType = meetingType;
-//        this.section = section;
-//        this.endTime = endTime;
-//        this.enrolled = enrolled;
-//        this.days = days;
-//        this.prerequisite = prerequisite;
-//        this.title = title;
-//        this.id = id;
-//        this.instructor = instructor;
-//        this.scheduleNo = scheduleNo;
-//        this.units = units;
-//        this.room = room;
-//        this.waitlist = waitlist;
-//        this.seats = seats;
-//        this.fullTitle = fullTitle;
-//        this.subject = subject;
-//        this.courseNo = courseNo;
-//    }
 
     public String getDescription() {
         return description;

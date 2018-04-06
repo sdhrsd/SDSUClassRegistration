@@ -2,9 +2,9 @@
 <resources>
     <string-array name="level_list">
         <item>Select Level</item>
-        <item>Lower</item>
-        <item>Upper</item>
-        <item>Graduate</item>
+        <item>lower</item>
+        <item>upper</item>
+        <item>graduate</item>
     </string-array>
     <string-array name="start_time_list">
         <item>Start</item>

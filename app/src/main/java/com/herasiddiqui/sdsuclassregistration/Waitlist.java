@@ -73,7 +73,6 @@ public class Waitlist extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        //getWaitlistedClasses(retrievedRedID,retrievedPassword);
     }
 
     @Override

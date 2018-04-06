@@ -113,12 +113,10 @@ public class MainActivity extends AppCompatActivity {
     public void getResponse(JSONObject response){
         try {
             Log.i("TAG", response.toString()+ "this is the response ");
-            //Toast.makeText(this, response.toString(), Toast.LENGTH_SHORT).show();
             String objectString = response.toString();
             JSONObject jsonReturned = new JSONObject(objectString);
             if(jsonReturned.has("ok")){
                 Toast.makeText(this, jsonReturned.get("ok").toString(), Toast.LENGTH_SHORT).show();
-
                 SharedPreferences sharedPref = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("FirstName", firstName.getText().toString());
@@ -127,9 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 editor.putString("password", password.getText().toString());
                 editor.putString("Email", email.getText().toString());
                 editor.commit();
-                Toast.makeText(MainActivity.this, " USER Information Saved!", Toast.LENGTH_SHORT).show();
-
-                // write code for next intent
+                Toast.makeText(MainActivity.this, R.string.user_info_saved, Toast.LENGTH_SHORT).show();
                 Intent go = new Intent(MainActivity.this,ClassesAndWaitlist.class);
                 startActivity(go);
                 finish();

@@ -29,6 +29,10 @@
     <string name="scheduleNo">Schedule# :</string>
     <string name="units">Units :</string>
     <string name="days">Days :</string>
+    <string name="description">Description :</string>
+    <string name="prerequisite">Prerequisite :</string>
+    <string name="section">Section :</string>
+    <string name="meetings">Meetings :</string>
 
     <string name="cancel">Cancel</string>
     <string name="remove">Remove</string>
@@ -39,4 +43,13 @@
     <string name="dismiss_builder">Cancel</string>
     <string name="ok_builder">OK</string>
     <string name="clear_all_builder">Clear</string>
+
+    <string name="addS">Add</string>
+    <string name="waitS">Wait</string>
+
+    <string name="seats">Seats :</string>
+    <string name="waitlist">Waitlist :</string>
+
+    <string name="user_info_saved">User Information Saved</string>
+
 </resources>
